@@ -1,0 +1,153 @@
+PROJECT := my-rtos
+
+BUILD_DIR := build
+
+# Toolchain Setup
+
+CC := arm-none-eabi-gcc
+AS := arm-none-eabi-gcc
+OBJCOPY := arm-none-eabi-objcopy
+SIZE := arm-none-eabi-size
+GDB := arm-none-eabi-gdb
+
+# Add ability to change later
+BOARD_TYPE := cortex-m
+
+BOARD_DIR := boards/nucleo_l432kc
+LINKER_SCRIPT := $(BOARD_DIR)/linker/STM32L432KCUX_FLASH.ld
+STARTUP := $(BOARD_DIR)/startup/startup_stm32l432xx.s
+
+# MCU Flags
+
+CPU := -mcpu=cortex-m4
+FPU := -mfpu=fpv4-sp-d16
+FLOAT-ABI := -mfloat-abi=hard
+MCU := $(CPU) -mthumb -mthumb-interwork $(FPU) $(FLOAT-ABI)
+
+# Build dir mkdir macro
+
+MKDIR_CMD := mkdir -p "$(BUILD_DIR)"
+
+# Defines
+
+DEFINES := -DSTM32L432xx
+ 
+# Includes
+
+INCLUDES := \
+	-Iapp/inc \
+	-Ikernel/inc \
+	-Idrivers/inc \
+	-Iports/cortex-m/inc \
+	-I$(BOARD_DIR)/inc \
+	-Ithird-party/cmsis/Core/Include \
+	-Ithird-party/cmsis/Device/ST/STM32L4xx/Include \
+
+# Sources
+
+C_SOURCES := \
+	$(shell find app/src kernel/src drivers/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src -name '*.c') \
+	$(BOARD_DIR)/startup/system_stm32l4xx.c
+
+ASM_SOURCES := \
+	$(STARTUP) \
+	ports/$(BOARD_TYPE)/src/port_asm.s
+
+# Output Files
+
+ELF := $(BUILD_DIR)/$(PROJECT).elf
+BIN := $(BUILD_DIR)/$(PROJECT).bin
+HEX := $(BUILD_DIR)/$(PROJECT).hex
+MAP := $(BUILD_DIR)/$(PROJECT).map
+
+# Object Files
+
+C_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
+ASM_OBJECTS := $(patsubst %.s,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
+OBJECTS := $(C_OBJECTS) $(ASM_OBJECTS)
+
+# Dependency Files
+
+DEPS := $(OBJECTS:.o=.d)
+
+# Flags
+
+COMMON_FLAGS := \
+	$(MCU) \
+	$(DEFINES) \
+	$(INCLUDES) \
+	-ffreestanding \
+	-fdata-sections \
+	-ffunction-sections \
+	-Wall \
+	-Wextra \
+	-Werror \
+	-g3 \
+	-O0
+
+CFLAGS := \
+	$(COMMON_FLAGS) \
+	-std=c11 \
+	-MMD \
+	-MP
+
+ASFLAGS := \
+	$(COMMON_FLAGS) \
+	-x assembler-with-cpp \
+	-MMD \
+	-MP
+
+LDFLAGS := \
+	$(MCU) \
+	-T$(LINKER_SCRIPT) \
+	-Wl,-Map=$(MAP),--cref \
+	-Wl,--gc-sections \
+	-Wl,--print-memory-usage \
+	--specs=nano.specs \
+	-lc -lm -lnosys
+
+# Targets
+
+.PHONY: all clean flash debug gdb size
+
+all: $(ELF) $(BIN) $(HEX) size
+
+$(ELF): $(OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: %.s
+	@mkdir -p $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
+
+$(BIN): $(ELF)
+	$(OBJCOPY) -O binary $< $@
+
+$(HEX): $(ELF)
+	$(OBJCOPY) -O ihex $< $@
+
+size: $(ELF)
+	$(SIZE) $<
+
+flash: $(ELF)
+	openocd \
+		-f interface/stlink.cfg \
+		-f target/stm32l4x.cfg \
+		-c "program $(ELF) verify reset exit"
+
+debug:
+	openocd \
+		-f interface/stlink.cfg \
+		-f target/stm32l4x.cfg
+
+gdb: $(ELF)
+	$(GDB) -ex "target remote localhost:3333" -ex "monitor reset halt" -ex "load" $(ELF)
+
+clean:
+	rm -rf $(BUILD_DIR) compile_flags.txt
+
+-include $(DEPS)
