@@ -1,5 +1,0 @@
-ArgumentLists:
-  - [ --query-driver=/opt/homebrew/bin/arm-none-eabi-gcc ]
-
-CompileFlags:
-  Remove: [-mthumb-interwork]
