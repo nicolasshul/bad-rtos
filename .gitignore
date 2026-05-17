@@ -1,0 +1,14 @@
+build/
+
+*.d
+*.o
+
+*.map
+*.hex
+*.bin
+*.elf
+
+compile_flags.txt
+compile_commands.json
+.vscode/
+.DS_Store
