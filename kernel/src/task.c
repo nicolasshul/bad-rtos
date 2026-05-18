@@ -40,3 +40,30 @@ void task_delete(TaskHandle_t task) {
   // move_task_to_termination_list() then it will be handled by the idle task (looping through zombies)
   // task_resume_all() and trigger a context switch.
 }
+
+void task_priority_set(TaskHandle_t task, uint8_t new_priority) {
+  task->priority = new_priority;
+  // If the new priority is higher than the priority of the currently running task, a context switch is called
+}
+
+// void task_delay(uint64_t delay) {
+  // update wake_tick
+  // set current task to sleeping
+  // enter critical section (disable all interrupts) --> port layer
+  // enqueue the task to the sleeping tasks list (sorted)
+  // get out of critical section --> port layer
+  // call for a context switch, which in itself calls schedule
+  // return;
+
+// }
+
+
+/*
+ * There are three states that the task can be in:
+ *  - Ready: In the ready list, and ready to execute. It will be eventually ran by the scheduler.
+ *  - Sleeping: The task is delayed, and is put into a delta list, sorted by time til wake, then eventually put back into ready state when times up
+ *  - Blocked: The task is waiting for something to happen
+ *    - If the task tried to take a mutex that is already held, puts into wait queue attatched to that mutex and is moved out of ready list
+ *    - If the task tried to access a semaphore which it cannot, it is put into the wait queue attatched to that semaphore and is moved out of ready list
+ *    - If the task is waiting for hardware (like uart read), it joins that uart's semaphore, then in the ISR it gets released (if woken up task has higher priority send PendSV)
+ */

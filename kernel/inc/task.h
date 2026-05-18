@@ -16,6 +16,9 @@ void task_delete(TaskHandle_t task);
 // Delayed by delay amnt of ticks
 void task_delay(uint64_t delay);
 
+// Delayed until certain absolute tick count
+void task_delay_until(uint64_t *previous_wake_time, const uint64_t increment);
+
 // suspended task will never start up again unless resumed
 void task_suspend(TaskHandle_t task);
 
