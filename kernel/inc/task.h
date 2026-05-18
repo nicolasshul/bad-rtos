@@ -2,13 +2,13 @@
 #define TASK_H
 
 #include <stdint.h>
-
+#include <stddef.h>
 
 typedef struct TaskCB_t *TaskHandle_t;
 
 // global vars: task_id, running_task, 
 
-TaskHandle_t task_create(const char * task_name, uint8_t priority, uint32_t stack_size, void (*running_function)(void *), void * params);
+TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_size, void (*running_function)(void *), void * params);
 
 // If null is passed in, then the current running task is deleted.
 void task_delete(TaskHandle_t task);

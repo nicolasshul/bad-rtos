@@ -19,7 +19,7 @@ typedef void (*TaskFunction_t)(void *);
 typedef struct TaskCB_t {
   uint32_t * sp; // stack pointer of this task
   uint32_t * bp; // base pointer of this task
-  uint32_t stack_size;
+  size_t stack_size;
   TaskState_e state;
   
   uint8_t priority;
@@ -32,7 +32,6 @@ typedef struct TaskCB_t {
   void * function_params;
 
   const char * task_name;
-  uint8_t task_id; // unique task id
 } TaskCB_t;
 
 #endif
