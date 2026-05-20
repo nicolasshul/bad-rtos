@@ -146,4 +146,21 @@ int insert_at_index_list(Task_List_t * list, TaskCB_t * task, int index) {
 }
       
 
-int contains_list(Task_List_t * list, TaskCB_t * task);
+int contains_list(Task_List_t * list, TaskCB_t * task) {
+  if (list == NULL || task == NULL) {
+    return -1;
+  }
+  if (task->next == NULL && list->tail == task) {
+    return 1;
+  }
+  else {
+    TaskCB_t * ptr = list->root;
+    while (ptr != NULL) {
+      if (ptr == task) {
+        return 1;
+      }
+      ptr = ptr->next;
+    }
+    return 0;
+  }
+}
