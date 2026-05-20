@@ -40,13 +40,14 @@ INCLUDES := \
 	-Idrivers/inc \
 	-Iports/cortex-m/inc \
 	-I$(BOARD_DIR)/inc \
+	-Iutils/inc \
 	-Ithird-party/cmsis/Core/Include \
 	-Ithird-party/cmsis/Device/ST/STM32L4xx/Include \
 
 # Sources
 
 C_SOURCES := \
-	$(shell find app/src kernel/src drivers/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src -name '*.c') \
+	$(shell find app/src kernel/src drivers/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src utils/src -name '*.c') \
 	$(BOARD_DIR)/startup/system_stm32l4xx.c
 
 ASM_SOURCES := \
