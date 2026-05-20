@@ -118,6 +118,32 @@ int remove_from_list(Task_List_t * list, TaskCB_t *task) {
   }
 }
 
-int insert_at_index_list(Task_List_t * list, int index);
+int insert_at_index_list(Task_List_t * list, TaskCB_t * task, int index) {
+  if (list == NULL || index < 0 || index > list->num_elements) {
+    return -1;
+  }
+
+  if (index == list->num_elements) { // insert at tail
+    return append_to_end_list(list, task);
+  }
+  else if (index == 0) {
+    return insert_front_list(list, task);
+  }
+  else {
+    TaskCB_t * ptr = list->root;
+    for (int i = 0; i < index; i++) {
+      ptr = ptr->next;
+    }
+    // enter critical
+    ptr->prev->next = task;
+    task->prev = ptr->prev;
+    ptr->prev = task;
+    task->next = ptr;
+    list->num_elements += 1;
+    // exit critical
+    return 0;
+  }
+}
+      
 
 int contains_list(Task_List_t * list, TaskCB_t * task);

@@ -19,7 +19,7 @@ int insert_front_list(Task_List_t * list, TaskCB_t * task);
 
 int remove_from_list(Task_List_t * list, TaskCB_t * task);
 
-int insert_at_index_list(Task_List_t * list, int index);
+int insert_at_index_list(Task_List_t * list, TaskCB_t * task, int index);
 
 int contains_list(Task_List_t * list, TaskCB_t * task);
 
