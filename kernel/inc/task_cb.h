@@ -15,8 +15,10 @@ typedef enum {
 
 typedef void (*TaskFunction_t)(void *);
 
+typedef struct TaskCB_t TaskCB_t;
+
 // Task Control Block
-typedef struct TaskCB_t {
+struct TaskCB_t {
   uint32_t * sp; // stack pointer of this task
   uint32_t * bp; // base pointer of this task
   size_t stack_size;
@@ -25,13 +27,14 @@ typedef struct TaskCB_t {
   uint8_t priority;
   uint64_t wake_tick; // only used when task is sleeping
 
-  struct TaskCB_T * next;
-  struct TaskCB_T * prev;
+  TaskCB_t * next;
+  struct TaskCB_t * prev;
 
   TaskFunction_t running_function;
   void * function_params;
 
   const char * task_name;
-} TaskCB_t;
+  uint8_t task_id; // unique task id
+};
 
 #endif

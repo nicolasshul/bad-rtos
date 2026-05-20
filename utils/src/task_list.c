@@ -16,6 +16,7 @@ Task_List_t * new_list() {
 
 void delete_list(Task_List_t * list) {
   rtos_free(list);
+  list = NULL;
 }
 
 int append_to_end_list(Task_List_t * list, TaskCB_t *task) {
@@ -37,7 +38,7 @@ int append_to_end_list(Task_List_t * list, TaskCB_t *task) {
     // enter critical --> port
     task->prev = list->tail;
     list->tail->next = task;
-    list->num_elements = list->num_elements + 1;
+    list->num_elements += 1;
     // exit critical --> port
     return 0;
   }
@@ -63,11 +64,60 @@ int insert_front_list(Task_List_t * list, TaskCB_t *task) {
     task->next = list->root;
     list->root->prev = task;
     list->root = task;
-    list->num_elements = list->num_elements + 1;
+    list->num_elements += 1;
     // exit critical
     return 0;
+  }
 }
 
-int delete_from_list(TaskCB_t *task);
+int remove_from_list(Task_List_t * list, TaskCB_t *task) {
+  if (task == NULL) {
+    return -1;
+  }
+  if (task == list->tail && task == list->root) {
+    // enter critical
+    list->tail = NULL;
+    list->root = NULL;
+    list->num_elements = 0;
+    // exit critical
+    task->next = NULL;
+    task->prev = NULL;
+    return 0;
+  }
+  else if (task == list->tail) {
+    // enter critical
+    list->tail = task->prev;
+    list->tail->next = NULL;
+    list->num_elements -= 1; 
+    // exit critical
+    task->next = NULL;
+    task->prev = NULL;
+    return 0;
+  }
+  else if (task == list->root) {
+    // enter critical
+    list->root = task->next;
+    list->root->prev = NULL;
+    list->num_elements -= 1;
+    // exit critical
+    task->next = NULL;
+    task->prev = NULL;
+    return 0;
+  }
+  else {
+    // enter critical
+    task->next->prev = task->prev;
+    task->prev->next = task->next;
+    list->num_elements -= 1;
+    // exit critical
+    
+    task->next = NULL;
+    task->prev = NULL;
+    list = NULL;
+    return 0;
+  }
+}
 
 int insert_at_index_list(Task_List_t * list, int index);
+
+int contains_list(Task_List_t * list, TaskCB_t * task);
