@@ -70,7 +70,7 @@ int insert_front_list(Task_List_t * list, TaskCB_t *task) {
   }
 }
 
-int remove_from_list(Task_List_t * list, TaskCB_t *task) {
+int remove_from_list(Task_List_t * list, TaskCB_t * task) {
   if (task == NULL) {
     return -1;
   }
@@ -163,4 +163,17 @@ int contains_list(Task_List_t * list, TaskCB_t * task) {
     }
     return 0;
   }
+}
+
+int is_empty(Task_List_t * list) {
+  if (list == NULL) {
+    return -1;
+  }
+  if (list->root == NULL && list->tail == NULL && list->num_elements == 0) {
+    return 1;
+  }
+  else if (list->root != NULL && list->tail != NULL && list->num_elements > 0) {
+    return 0;
+  }
+  return -1;
 }

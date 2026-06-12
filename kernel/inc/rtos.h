@@ -3,13 +3,17 @@
 
 #include "task_list.h"
 #include "task.h"
+#include <stdint.h>
 
-Task_List_t rtos_asleep_list;
-Task_List_t rtos_ready_list;
+Task_List_t * rtos_asleep_list;
+Task_List_t * rtos_ready_list;
+Task_List_t * rtos_waiting_ready_list;
 
-TaskHandle_t * current_task;
+TaskCB_t * current_task;
 
-static int task_id = 0;
+int task_id = 0;
+int current_tick = 0;
+uint8_t scheduler_suspended_flag = 0;
 
 void rtos_init();
 

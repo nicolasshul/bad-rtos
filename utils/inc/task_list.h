@@ -30,5 +30,8 @@ int insert_at_index_list(Task_List_t * list, TaskCB_t * task, int index);
 // Checks if a list contains a task: 1 if true, 0 if false
 int contains_list(Task_List_t * list, TaskCB_t * task);
 
+// Checks if a list is empty: 1 if empty, 0 if not
+int is_empty(Task_List_t * list);
+
 #endif // TASK_LIST_H
 
