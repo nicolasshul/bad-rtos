@@ -5,6 +5,8 @@
 #include "malloc.h"
 #include "port.h"
 
+extern int task_id;
+
 TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_size, void (*running_function)(void *), void * params) {
   // task_suspend_all() --> Not implemented yet, used in rtos_malloc
   TaskHandle_t task = (TaskHandle_t) rtos_malloc(sizeof(TaskHandle_t));
@@ -14,6 +16,7 @@ TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_
   task->task_name = task_name;
   task->running_function = running_function;
   task->function_params = params;
+  task->task_id = task_id++;
   
   // task->state = READY; maybe? not sure yet
   task->wake_tick = 0;
