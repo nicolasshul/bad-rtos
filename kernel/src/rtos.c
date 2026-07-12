@@ -1,4 +1,6 @@
 #include "rtos.h"
+#include "task_list.h"
+#include "task_cb.h"
 
 extern uint8_t scheduler_suspended_flag;
 
@@ -37,3 +39,11 @@ void task_resume_all() {
   }
   // TODO: exit critical
 }
+
+// Assumes task is not in any list
+void move_to_ready_list(TaskCB_t * task) {
+  append_to_end_list(rtos_ready_list, task);
+  task->state = READY; 
+}
+
+

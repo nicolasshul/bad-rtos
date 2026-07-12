@@ -2,7 +2,7 @@
 #define RTOS_H
 
 #include "task_list.h"
-#include "task.h"
+#include "task_cb.h"
 #include <stdint.h>
 
 Task_List_t * rtos_asleep_list;
@@ -17,10 +17,10 @@ uint8_t scheduler_suspended_flag = 0;
 
 void rtos_init();
 
-void move_to_ready_list(TaskHandle_t task);
+void move_to_ready_list(TaskCB_t * task);
 
 // insert is sorted by time til wake
-void move_to_asleep_list(TaskHandle_t task, uint64_t delay);
+void move_to_asleep_list(TaskCB_t * task, uint64_t delay);
 
 void task_suspend_all();
 
