@@ -71,5 +71,21 @@ void move_to_ready_list(TaskCB_t * task) {
   task->state = READY; 
 }
 
+// Called from pendsv handler
+void schedule() {
+  if (rtos_ready_list == NULL || rtos_ready_list->root == NULL) {
+    return;
+  }
+
+  TaskCB_t *next_task = rtos_ready_list->root;
+  for (TaskCB_t *task = rtos_ready_list->root; task != NULL; task = task->next) {
+    if (task->priority > next_task->priority) {
+      next_task = task;
+    }
+  }
+
+  current_task = next_task;
+  current_task->state = RUNNING;
+}
 
 
