@@ -11,7 +11,7 @@ SIZE := arm-none-eabi-size
 GDB := arm-none-eabi-gdb
 
 # Add ability to change later
-BOARD_TYPE := cortex-m
+BOARD_TYPE := cortex-m4
 
 BOARD_DIR := boards/nucleo_l432kc
 LINKER_SCRIPT := $(BOARD_DIR)/linker/STM32L432KCUX_FLASH.ld
@@ -38,7 +38,7 @@ INCLUDES := \
 	-Iapp/inc \
 	-Ikernel/inc \
 	-Idrivers/inc \
-	-Iports/cortex-m/inc \
+	-Iports/cortex-m4/inc \
 	-I$(BOARD_DIR)/inc \
 	-Iutils/inc \
 	-Ithird-party/cmsis/Core/Include \
