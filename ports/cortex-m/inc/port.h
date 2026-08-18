@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PORT_H
+#define PORT_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -25,3 +26,5 @@ void port_systick_init(uint32_t tick_hz);
 __attribute__((noreturn)) void port_task_exit(void);
 
 void port_yield(void);
+
+#endif /* PORT_H */

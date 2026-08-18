@@ -4,11 +4,12 @@
 #include "task.h"
 #include "malloc.h"
 #include "port.h"
+#include "rtos.h"
 
 extern int task_id;
 
 TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_size, void (*running_function)(void *), void * params) {
-  // task_suspend_all() --> Not implemented yet, used in rtos_malloc
+  task_suspend_all();
   TaskHandle_t task = (TaskHandle_t) rtos_malloc(sizeof(TaskHandle_t));
 
   task->priority = priority;
@@ -22,16 +23,15 @@ TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_
   task->wake_tick = 0;
 
   task->bp = (uint32_t *) rtos_malloc(stack_size);
-  task->sp = task->sp = port_initialize_stack(
+  task->sp = port_initialize_stack(
     task->bp,
     stack_size,
     task->running_function,
     task->function_params
   );
 
-  // port_initialize_stack() implemented on the port side (loads registers into stack)
-  // add_to_ready_list() implemented in rtos.h, TODO
-  // task_resume_all
+  move_to_ready_list(task);
+  task_resume_all();
   return task;
 }
 

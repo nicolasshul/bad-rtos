@@ -5,15 +5,15 @@
 #include "task_cb.h"
 #include <stdint.h>
 
-Task_List_t * rtos_asleep_list;
-Task_List_t * rtos_ready_list;
-Task_List_t * rtos_waiting_ready_list;
+extern Task_List_t * rtos_asleep_list;
+extern Task_List_t * rtos_ready_list;
+extern Task_List_t * rtos_waiting_ready_list;
 
-TaskCB_t * current_task;
+extern TaskCB_t * current_task;
 
-int task_id = 0;
-uint64_t current_tick = 0;
-uint8_t scheduler_suspended_flag = 0;
+extern int task_id;
+extern uint64_t current_tick;
+extern uint8_t scheduler_suspended_flag;
 
 void rtos_init();
 

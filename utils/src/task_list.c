@@ -1,5 +1,6 @@
 #include "task_list.h"
 #include "malloc.h"
+#include "port.h"
 #include "task_cb.h"
 
 Task_List_t * new_list() {
@@ -26,21 +27,21 @@ int append_to_end_list(Task_List_t * list, TaskCB_t *task) {
   if (list->root == NULL) {
     task->next = NULL;
     task->prev = NULL;
-    // enter critical --> port
+    uint32_t state = port_enter_critical();
     list->root = task;
     list->tail = task;
     list->num_elements = 1;
-    // exit critical --> port
+    port_exit_critical(state);
     return 0;
   }
   else {
     task->next = NULL;
-    // enter critical --> port
+    uint32_t state = port_enter_critical();
     task->prev = list->tail;
     list->tail->next = task;
     list->num_elements += 1;
     list->tail = task;
-    // exit critical --> port
+    port_exit_critical(state);
     return 0;
   }
 }
@@ -52,21 +53,21 @@ int insert_front_list(Task_List_t * list, TaskCB_t *task) {
   if (list->root == NULL) {
     task->next = NULL;
     task->prev = NULL;
-    // enter critical
+    uint32_t state = port_enter_critical();
     list->root = task;
     list->tail = task;
     list->num_elements = 1;
-    // exit critical
+    port_exit_critical(state);
     return 0;
   }
   else {
     task->prev = NULL;
-    // enter critical
+    uint32_t state = port_enter_critical();
     task->next = list->root;
     list->root->prev = task;
     list->root = task;
     list->num_elements += 1;
-    // exit critical
+    port_exit_critical(state);
     return 0;
   }
 }
@@ -76,41 +77,41 @@ int remove_from_list(Task_List_t * list, TaskCB_t * task) {
     return -1;
   }
   if (task == list->tail && task == list->root) {
-    // enter critical
+    uint32_t state = port_enter_critical();
     list->tail = NULL;
     list->root = NULL;
     list->num_elements = 0;
-    // exit critical
+    port_exit_critical(state);
     task->next = NULL;
     task->prev = NULL;
     return 0;
   }
   else if (task == list->tail) {
-    // enter critical
+    uint32_t state = port_enter_critical();
     list->tail = task->prev;
     list->tail->next = NULL;
     list->num_elements -= 1; 
-    // exit critical
+    port_exit_critical(state);
     task->next = NULL;
     task->prev = NULL;
     return 0;
   }
   else if (task == list->root) {
-    // enter critical
+    uint32_t state = port_enter_critical();
     list->root = task->next;
     list->root->prev = NULL;
     list->num_elements -= 1;
-    // exit critical
+    port_exit_critical(state);
     task->next = NULL;
     task->prev = NULL;
     return 0;
   }
   else {
-    // enter critical
+    uint32_t state = port_enter_critical();
     task->next->prev = task->prev;
     task->prev->next = task->next;
     list->num_elements -= 1;
-    // exit critical
+    port_exit_critical(state);
     
     task->next = NULL;
     task->prev = NULL;
@@ -137,13 +138,13 @@ int insert_at_index_list(Task_List_t * list, TaskCB_t * task, int index) {
     for (int i = 0; i < index; i++) {
       ptr = ptr->next;
     }
-    // enter critical
+    uint32_t state = port_enter_critical();
     ptr->prev->next = task;
     task->prev = ptr->prev;
     ptr->prev = task;
     task->next = ptr;
     list->num_elements += 1;
-    // exit critical
+    port_exit_critical(state);
     return 0;
   }
 }
