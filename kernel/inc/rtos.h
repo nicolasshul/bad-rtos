@@ -12,7 +12,7 @@ Task_List_t * rtos_waiting_ready_list;
 TaskCB_t * current_task;
 
 int task_id = 0;
-int current_tick = 0;
+uint64_t current_tick = 0;
 uint8_t scheduler_suspended_flag = 0;
 
 void rtos_init();

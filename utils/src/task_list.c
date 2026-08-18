@@ -39,6 +39,7 @@ int append_to_end_list(Task_List_t * list, TaskCB_t *task) {
     task->prev = list->tail;
     list->tail->next = task;
     list->num_elements += 1;
+    list->tail = task;
     // exit critical --> port
     return 0;
   }
@@ -113,7 +114,9 @@ int remove_from_list(Task_List_t * list, TaskCB_t * task) {
     
     task->next = NULL;
     task->prev = NULL;
-    list = NULL;
+    if (list != NULL) {
+      list = NULL;
+    }
     return 0;
   }
 }

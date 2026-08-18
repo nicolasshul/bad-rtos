@@ -22,10 +22,16 @@ TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_
   task->wake_tick = 0;
 
   task->bp = (uint32_t *) rtos_malloc(stack_size);
-  task->sp = task->bp;
+  task->sp = task->sp = port_initialize_stack(
+    task->bp,
+    stack_size,
+    task->running_function,
+    task->function_params
+  );
 
   // port_initialize_stack() implemented on the port side (loads registers into stack)
   // add_to_ready_list() implemented in rtos.h, TODO
+  // task_resume_all
   return task;
 }
 

@@ -1,8 +1,20 @@
 #include "rtos.h"
 #include "task_list.h"
 #include "task_cb.h"
+#include <stdint.h>
 
-extern uint8_t scheduler_suspended_flag;
+
+void rtos_init() {
+  rtos_asleep_list = new_list();
+  rtos_ready_list = new_list();
+  rtos_waiting_ready_list = new_list();
+
+  current_tick = 0;
+  scheduler_suspended_flag = 0; // turn to enum
+
+  // init port
+  // start first task (idle task)
+}
 
 void task_suspend_all() {
   // incremented to allow for the nesting of suspensions
@@ -45,5 +57,6 @@ void move_to_ready_list(TaskCB_t * task) {
   append_to_end_list(rtos_ready_list, task);
   task->state = READY; 
 }
+
 
 
