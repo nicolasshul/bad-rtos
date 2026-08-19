@@ -30,6 +30,8 @@ void task_resume_all();
 // only to be called from port_context_switch, finds the highest priority ready task then updates lists and current_task
 void schedule();
 
+void rtos_tick();
+
 
 #endif // RTOS_H
 

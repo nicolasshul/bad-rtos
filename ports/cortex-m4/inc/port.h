@@ -23,9 +23,6 @@ void port_exit_critical(uint32_t state);
 
 void port_systick_init(uint32_t tick_hz);
 
-// Called if a task function ever returns
-__attribute__((noreturn)) void port_task_exit(void);
-
 void port_yield(void);
 
 #endif /* PORT_H */

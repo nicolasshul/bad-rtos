@@ -1,4 +1,5 @@
 #include "port.h"
+#include "rtos.h"
 #include "cmsis_gcc.h"
 #include "mcu_device.h"
 
@@ -6,6 +7,14 @@
 #include <stddef.h>
 
 #define MAX_SYSCALL_PRIORITY (5 << (8 - __NVIC_PRIO_BITS)) // priority bits are left aligned
+#define RTOS_TICK_RATE_HZ 1000 // 1 ms
+
+// Called if a task function ever returns
+__attribute__((noreturn)) void port_task_exit(void) {
+    while (1) {
+        // rtos task should never return
+    }
+}
 
 void port_init(void) {
     // init board (set pendsv and systick priorities) pendsv should be lowest priority
@@ -77,7 +86,10 @@ uint32_t *port_initialize_stack(uint32_t *stack_base, size_t stack_size, void (*
 __attribute__((noreturn)) void port_start_scheduler(void);
 
 void port_context_switch(void) {
+    SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; // Set the interrupt control and safety register to trigger PendSV
 
+    __DSB(); // wait for all ldr and str instructions to finish
+    __ISB(); // flush cpu pipeline
 }
 
 uint32_t port_enter_critical(void) {
@@ -97,13 +109,17 @@ void port_exit_critical(uint32_t state) {
     __set_BASEPRI(state);
 }
 
-void port_systick_init(uint32_t tick_hz);
+void port_systick_init(uint32_t cpu_clock_hz) {
+    uint32_t ticks_per_interrupt = cpu_clock_hz / RTOS_TICK_RATE_HZ;
 
-// Called if a task function ever returns
-__attribute__((noreturn)) void port_task_exit(void) {
-    while (1) {
-        // rtos task should never return
-    }
+    SysTick_Config(ticks_per_interrupt);
+
+    NVIC_SetPriority(SysTick_IRQn, 255);
+    NVIC_SetPriority(PendSV_IRQn, 255); // set to lowest possible priority
 }
 
 void port_yield(void);
+
+void SysTick_Handler() {
+    rtos_tick();
+}

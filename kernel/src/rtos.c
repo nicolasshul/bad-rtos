@@ -88,4 +88,15 @@ void schedule() {
   current_task->state = RUNNING;
 }
 
+void rtos_tick(void) {
+  current_tick++;
+
+  // check if any asleep tasks should be woken up
+  // check if any higher-priority tasks are awake
+
+  // if so:
+  port_context_switch();
+
+}
+
 
