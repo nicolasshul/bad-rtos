@@ -43,12 +43,35 @@ INCLUDES := \
 	-Iutils/inc \
 	-Ithird-party/cmsis/Core/Include \
 	-Ithird-party/cmsis/Device/ST/STM32L4xx/Include \
+	-I$(BOARD_DIR)/drivers/STM32L4xx_HAL_Driver/Inc \
 
 # Sources
 
+HAL_DIR := $(BOARD_DIR)/drivers/STM32L4xx_HAL_Driver/Src
+
+HAL_SOURCES := \
+	$(HAL_DIR)/stm32l4xx_hal_tim.c \
+	$(HAL_DIR)/stm32l4xx_hal_tim_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal.c \
+	$(HAL_DIR)/stm32l4xx_hal_rcc.c \
+	$(HAL_DIR)/stm32l4xx_hal_rcc_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal_flash.c \
+	$(HAL_DIR)/stm32l4xx_hal_flash_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal_flash_ramfunc.c \
+	$(HAL_DIR)/stm32l4xx_hal_gpio.c \
+	$(HAL_DIR)/stm32l4xx_hal_i2c.c \
+	$(HAL_DIR)/stm32l4xx_hal_i2c_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal_dma.c \
+	$(HAL_DIR)/stm32l4xx_hal_dma_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal_pwr.c \
+	$(HAL_DIR)/stm32l4xx_hal_pwr_ex.c \
+	$(HAL_DIR)/stm32l4xx_hal_cortex.c \
+	$(HAL_DIR)/stm32l4xx_hal_exti.c \
+
 C_SOURCES := \
 	$(shell find app/src kernel/src drivers/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src utils/src -name '*.c') \
-	$(BOARD_DIR)/startup/system_stm32l4xx.c
+	$(BOARD_DIR)/startup/system_stm32l4xx.c \
+	$(HAL_SOURCES) \
 
 ASM_SOURCES := \
 	$(STARTUP) \
