@@ -10,7 +10,7 @@ extern int task_id;
 
 TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_size, void (*running_function)(void *), void * params) {
   task_suspend_all();
-  TaskHandle_t task = (TaskHandle_t) rtos_malloc(sizeof(TaskHandle_t));
+  TaskHandle_t task = (TaskHandle_t) rtos_malloc(sizeof(TaskCB_t));
 
   task->priority = priority;
   task->stack_size = stack_size;
