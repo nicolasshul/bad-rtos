@@ -2,22 +2,19 @@
 #include "rtos.h"
 #include "cmsis_gcc.h"
 #include "mcu_device.h"
+#include "system_stm32l4xx.h"
 
 #include <stdint.h>
 #include <stddef.h>
 
 #define MAX_SYSCALL_PRIORITY (5 << (8 - __NVIC_PRIO_BITS)) // priority bits are left aligned
-#define RTOS_TICK_RATE_HZ 1000 // 1 ms
+#define RTOS_TICK_RATE_HZ 1000 // 1 ms TODO: Move to config
 
 // Called if a task function ever returns
 __attribute__((noreturn)) void port_task_exit(void) {
     while (1) {
         // rtos task should never return
     }
-}
-
-void port_init(void) {
-    // init board (set pendsv and systick priorities) pendsv should be lowest priority
 }
 
 uint32_t *port_initialize_stack(uint32_t *stack_base, size_t stack_size, void (*task)(void *), void *params) {
@@ -42,7 +39,7 @@ uint32_t *port_initialize_stack(uint32_t *stack_base, size_t stack_size, void (*
     sp[13] = (uint32_t) port_task_exit;
 
     // R12
-    sp[12] = 0x12121212; // Hex values helpful for debugging
+    sp[12] = 0x12121212; // Hex values for debugging
     
     // R3
     sp[11] = 0x03030303;
@@ -83,7 +80,25 @@ uint32_t *port_initialize_stack(uint32_t *stack_base, size_t stack_size, void (*
     return sp; // new top of the stack
 }
 
-__attribute__((noreturn)) void port_start_scheduler(void);
+__attribute__((noreturn)) void port_start_scheduler(void) {
+  current_task = NULL;
+  schedule(); // call schedule without a context switch to select a first task
+  
+  if (current_task == NULL) {
+    while (1) {
+      ; // there is no runnable task --> error
+    }
+  }
+
+  __asm volatile (
+    "svc 0    \n"
+  );
+
+  while (1) {
+    ; // startup failed
+  }
+
+}
 
 void port_context_switch(void) {
     SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; // Set the interrupt control and safety register to trigger PendSV
@@ -109,8 +124,8 @@ void port_exit_critical(uint32_t state) {
     __set_BASEPRI(state);
 }
 
-void port_systick_init(uint32_t cpu_clock_hz) {
-    uint32_t ticks_per_interrupt = cpu_clock_hz / RTOS_TICK_RATE_HZ;
+void port_init() {
+    uint32_t ticks_per_interrupt = SystemCoreClock / RTOS_TICK_RATE_HZ;
 
     SysTick_Config(ticks_per_interrupt);
 

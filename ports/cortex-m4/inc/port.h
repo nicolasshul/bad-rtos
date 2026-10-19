@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void port_init(void);
-
 uint32_t *port_initialize_stack(
   uint32_t *stack_base,
   size_t stack_size,
@@ -21,7 +19,7 @@ uint32_t port_enter_critical(void);
 
 void port_exit_critical(uint32_t state);
 
-void port_systick_init(uint32_t tick_hz);
+void port_init();
 
 void port_yield(void);
 

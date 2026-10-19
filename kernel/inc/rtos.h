@@ -32,6 +32,8 @@ void schedule();
 
 void rtos_tick();
 
+void rtos_start_scheduler();
+
 
 #endif // RTOS_H
 

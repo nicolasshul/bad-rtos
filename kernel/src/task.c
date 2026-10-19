@@ -9,8 +9,17 @@
 extern int task_id;
 
 TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_size, void (*running_function)(void *), void * params) {
+  if (running_function == NULL || stack_size < 128 || (stack_size % sizeof(uint32_t)) != 0) {
+    return NULL;
+  }
+
   task_suspend_all();
   TaskHandle_t task = (TaskHandle_t) rtos_malloc(sizeof(TaskCB_t));
+
+  if (task == NULL) {
+    task_resume_all();
+    return NULL;
+  }
 
   task->priority = priority;
   task->stack_size = stack_size;
@@ -23,6 +32,12 @@ TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_
   task->wake_tick = 0;
 
   task->bp = (uint32_t *) rtos_malloc(stack_size);
+
+  if (task->bp == NULL) {
+    task_resume_all();
+    return NULL;
+  }
+
   task->sp = port_initialize_stack(
     task->bp,
     stack_size,

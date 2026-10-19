@@ -28,6 +28,20 @@ void rtos_init() {
   port_start_scheduler();
 }
 
+void rtos_start_scheduler() {
+  if (rtos_ready_list == NULL || is_empty(rtos_ready_list)) {
+    while (1) {
+      ; // No task to run, error :(
+    }
+  }
+
+  port_start_scheduler();
+
+  while (1) {
+    ; // the scheduler should never return, so execution should never get here
+  }
+}
+
 void task_suspend_all() {
   // incremented to allow for the nesting of suspensions
   scheduler_suspended_flag++;
@@ -39,7 +53,7 @@ void task_resume_all() {
   TaskCB_t * isr_resumed_task; 
   uint8_t switch_pending_flag = 0;
   if (scheduler_suspended_flag == 0) {
-    // TODO: some kind of error handling?
+    // TODO: some kind of error handling
   }
 
   uint32_t state = port_enter_critical();
@@ -51,7 +65,7 @@ void task_resume_all() {
       // TODO: add to ready list isr_resumed_task
       move_to_ready_list(isr_resumed_task);
 
-      if (isr_resumed_task->priority >= current_task->priority) {
+      if (current_task != NULL && isr_resumed_task->priority >= current_task->priority) {
         switch_pending_flag = 1;
       }
     }
@@ -74,7 +88,9 @@ void move_to_ready_list(TaskCB_t * task) {
 // Called from pendsv handler
 void schedule() {
   if (rtos_ready_list == NULL || rtos_ready_list->root == NULL) {
-    return;
+    while (1) {
+      ;
+    }
   }
 
   TaskCB_t *next_task = rtos_ready_list->root;
