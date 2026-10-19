@@ -138,3 +138,11 @@ void port_yield(void);
 void SysTick_Handler() {
     rtos_tick();
 }
+
+void idle_task(void * params) {
+  (void) params;
+
+  for (;;) {
+    __asm volatile ("wfi"); // wait for interrupt instruction
+  }
+}

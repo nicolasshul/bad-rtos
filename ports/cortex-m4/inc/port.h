@@ -23,4 +23,6 @@ void port_init();
 
 void port_yield(void);
 
+void idle_task(void * params);
+
 #endif /* PORT_H */

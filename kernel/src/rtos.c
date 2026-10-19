@@ -1,4 +1,5 @@
 #include "rtos.h"
+#include "task.h"
 #include "port.h"
 #include "task_list.h"
 #include "task_cb.h"
@@ -23,6 +24,12 @@ void rtos_init() {
   scheduler_suspended_flag = 0; // turn to enum
   
   port_init();
+
+  if (task_create("idle", 0, 256, idle_task, NULL) == NULL) { // idle task with lowest priority
+    while (1) {
+      // something failed
+    }
+  }
 
   // start first task (idle task)
   port_start_scheduler();
@@ -79,29 +86,71 @@ void task_resume_all() {
   port_exit_critical(state);
 }
 
+int insert_ready_sorted(TaskCB_t * task) {
+  if (rtos_ready_list == NULL || task == NULL) {
+    return -1;
+  }
+
+  int index = 0;
+
+  for (TaskCB_t * list_task = rtos_ready_list->root; list_task != NULL; list_task = list_task->next) {
+    if (list_task->priority < task->priority) { // higher priority means higher scheduling priority
+      break;
+    }
+
+    index++;
+  }
+
+  return insert_at_index_list(rtos_ready_list, task, index);
+}
+
 // Assumes task is not in any list
 void move_to_ready_list(TaskCB_t * task) {
-  append_to_end_list(rtos_ready_list, task);
-  task->state = READY; 
+  if (task == NULL || rtos_ready_list == NULL) {
+    return;
+  }
+
+  if (insert_ready_sorted(task) == 0) {
+    task->state = READY;
+  }
 }
 
 // Called from pendsv handler
 void schedule() {
-  if (rtos_ready_list == NULL || rtos_ready_list->root == NULL) {
+  if (rtos_ready_list == NULL) {
     while (1) {
-      ;
+      ; // Error
     }
   }
 
-  TaskCB_t *next_task = rtos_ready_list->root;
-  for (TaskCB_t *task = rtos_ready_list->root; task != NULL; task = task->next) {
-    if (task->priority > next_task->priority) {
-      next_task = task;
+  if (current_task != NULL && current_task->state == RUNNING) { // requeue task if it remains runnable
+    TaskCB_t *previous_task = current_task;
+
+    previous_task->state = READY;
+
+    if (insert_ready_sorted(previous_task) != 0) {
+      while (1) {
+        ; // insertion failed
+      }
     }
   }
 
+  TaskCB_t * next_task = rtos_ready_list->root;
+
+  if (next_task == NULL) {
+    while (1) {
+      ; // Because of idle task there should always be a ready task
+    }
+  }
+
+  if (remove_from_list(rtos_ready_list, next_task) != 0) {
+    while (1) {
+      ; // Ready-list removal failed.
+    }
+  }
+    
+  next_task->state = RUNNING;
   current_task = next_task;
-  current_task->state = RUNNING;
 }
 
 void rtos_tick(void) {
