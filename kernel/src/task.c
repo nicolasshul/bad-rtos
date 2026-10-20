@@ -70,16 +70,50 @@ void task_priority_set(TaskHandle_t task, uint8_t new_priority) {
   // If the new priority is higher than the priority of the currently running task, a context switch is called
 }
 
-// void task_delay(uint64_t delay) {
-  // update wake_tick
-  // set current task to sleeping
-  // enter critical section (disable all interrupts) --> port layer
-  // enqueue the task to the sleeping tasks list (sorted)
-  // get out of critical section --> port layer
-  // call for a context switch, which in itself calls schedule
-  // return;
+void move_to_asleep_list(TaskCB_t *task, uint64_t delay)
+{
+  if (task == NULL || rtos_asleep_list == NULL) {
+    return;
+  }
 
-// }
+  task->wake_tick = current_tick + delay;
+
+  int index = 0;
+
+  for (TaskCB_t *it = rtos_asleep_list->root; it != NULL; it = it->next) {
+    if (it->wake_tick > task->wake_tick) {
+      break;
+    }
+
+    index++;
+  }
+
+  if (insert_at_index_list(rtos_asleep_list, task, index) == 0) {
+    task->state = SLEEPING;
+  }
+}
+
+void task_delay(uint64_t delay) {
+
+  if (current_task == NULL) {
+    return;
+  }
+
+  if (delay == 0) { // just a context switch
+    port_context_switch();
+    return;
+  }
+
+  uint32_t irq_state = port_enter_critical();
+
+  move_to_asleep_list(current_task, delay);
+
+  port_exit_critical(irq_state);
+  
+  port_context_switch();
+  return;
+
+}
 
 
 /*

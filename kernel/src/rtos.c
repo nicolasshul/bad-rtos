@@ -32,7 +32,7 @@ void rtos_init() {
   }
 
   // start first task (idle task)
-  port_start_scheduler();
+  // port_start_scheduler();
 }
 
 void rtos_start_scheduler() {
@@ -154,14 +154,27 @@ void schedule() {
 }
 
 void rtos_tick(void) {
+  uint32_t irq_state = port_enter_critical();
+
   current_tick++;
 
-  // check if any asleep tasks should be woken up
-  // check if any higher-priority tasks are awake
+  while (rtos_asleep_list != NULL && rtos_asleep_list->root != NULL) {
+    TaskCB_t * task = rtos_asleep_list->root;
 
-  // if so:
+    if (task->wake_tick > current_tick) {
+      break;
+    }
+
+    if (remove_from_list(rtos_asleep_list, task) != 0) {
+      break;
+    }
+
+    move_to_ready_list(task);
+  }
+
+  port_exit_critical(irq_state);
+
   port_context_switch();
-
 }
 
 

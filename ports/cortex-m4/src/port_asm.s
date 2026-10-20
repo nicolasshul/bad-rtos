@@ -8,10 +8,11 @@
 .global SVC_Handler
 .type SVC_Handler, %function
 
-.section text
+.section .text
 .extern current_task
 .extern schedule
 
+.thumb_func
 PendSV_Handler:
   // save current task
   mrs r0, psp           // read process stack pointer into r0
@@ -22,10 +23,10 @@ PendSV_Handler:
   str r0, [r1]          // store the psp in task_cb sp, first element of the struct
 
   // call scheduler
-  push {lr}             // push link register (EXC_RETURN) onto stack
+  push {r3, lr}             // push link register (EXC_RETURN) onto stack (two registers for alignment)
   ldr r2, =schedule     // load address of schedule into r2
   blx r2                // calls schedule and updates current_task
-  pop {lr}              // restore link register
+  pop {r3, lr}              // restore link register
 
   // load new task
   ldr r1, =current_task // get address of new current task
@@ -40,6 +41,7 @@ PendSV_Handler:
 
     .size PendSV_Handler, .-PendSV_Handler // calculate size of function for the linker
 
+.thumb_func
 SVC_Handler:
   ldr r0, =current_task   // r0 = memory address of current_task
   ldr r0, [r0]            // r0 = current_task

@@ -24,7 +24,7 @@ uint32_t *port_initialize_stack(uint32_t *stack_base, size_t stack_size, void (*
     uint32_t *sp = stack_base + (stack_size / sizeof(uint32_t));
 
     // stack pointer has to be 8 byte aligned (bp is created with malloc, which is already 8 byte aligned)
-    sp = (uint32_t *)((uint32_t)sp & ~0x07UL);
+    sp = (uint32_t *)((uint32_t)sp & ~(uintptr_t)0x07UL);
 
     // allocates space for 16 registers
     sp -= 16;
@@ -90,6 +90,17 @@ __attribute__((noreturn)) void port_start_scheduler(void) {
     }
   }
 
+  uint32_t sev = current_task->sp[7];
+  uint32_t eight = current_task->sp[8];
+  uint32_t thirteen = current_task->sp[13];
+  uint32_t fourteen = current_task->sp[14];
+  uint32_t fifteen = current_task->sp[15];
+
+  if (sev == eight || thirteen == fourteen || fifteen == sev) {
+    while (1) {
+      ;
+    }
+  }
   __asm volatile (
     "svc 0    \n"
   );
