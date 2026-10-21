@@ -14,7 +14,7 @@ Semaphore_t * semaphore_create(uint32_t initial_count, uint32_t max_count);
 
 int semaphore_take(Semaphore_t * sem);
 int sempahore_give(Semaphore_t * sem);
-void semaphore_delete(Semaphore_t *sem);
+int semaphore_delete(Semaphore_t *sem);
 
 
 #endif /* SEMAPHORE_H */

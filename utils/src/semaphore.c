@@ -109,7 +109,7 @@ int semaphore_delete(Semaphore_t *sem) {
   }
 
   if (sem->waiters != NULL) {
-    delete_list(waiters);
+    delete_list(sem->waiters);
   }
 
   rtos_free(sem);
