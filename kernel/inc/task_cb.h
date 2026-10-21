@@ -7,6 +7,7 @@
 typedef enum {
   RUNNING,
   READY,
+  BLOCKED,
   SLEEPING,
   SUSPENDED, // might not need (still alive but will never run)
   DELETED,

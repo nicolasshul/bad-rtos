@@ -20,10 +20,10 @@ typedef struct {
 
 Queue_t * queue_create(size_t capacity, size_t item_size);
 
-int queue_send(Queue_t queue, void * item);
+int queue_send(Queue_t * queue, void * item);
 
-int queue_receive(Queue_t queue, void * item); 
+int queue_receive(Queue_t * queue, void * item); 
 
-void queue_delete(Queue_t queue);
+int queue_delete(Queue_t * queue);
 
 #endif
