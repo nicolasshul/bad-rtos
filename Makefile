@@ -38,7 +38,6 @@ DEFINES := -DSTM32L432xx
 INCLUDES := \
     -Iapp/inc \
     -Ikernel/inc \
-    -Idrivers/inc \
     -Iports/cortex-m4/inc \
     -I$(BOARD_DIR)/inc \
     -Iutils/inc \
@@ -70,7 +69,7 @@ HAL_SOURCES := \
     $(HAL_DIR)/stm32l4xx_hal_exti.c \
 
 C_SOURCES := \
-    $(shell find app/src kernel/src drivers/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src utils/src -name '*.c') \
+    $(shell find app/src kernel/src ports/$(BOARD_TYPE)/src $(BOARD_DIR)/src utils/src -name '*.c') \
     $(BOARD_DIR)/startup/system_stm32l4xx.c \
     $(HAL_SOURCES) \
 

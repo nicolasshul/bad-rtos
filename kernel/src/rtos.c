@@ -60,7 +60,9 @@ void task_resume_all() {
   TaskCB_t * isr_resumed_task; 
   uint8_t switch_pending_flag = 0;
   if (scheduler_suspended_flag == 0) {
-    // TODO: some kind of error handling
+    while (1) {
+      ; // should never resume when not suspended
+    }
   }
 
   uint32_t state = port_enter_critical();
@@ -69,15 +71,13 @@ void task_resume_all() {
     while (is_empty(rtos_waiting_ready_list) == 0) {
       isr_resumed_task = rtos_waiting_ready_list->root;
       remove_from_list(rtos_waiting_ready_list, isr_resumed_task);
-      // TODO: add to ready list isr_resumed_task
+
       move_to_ready_list(isr_resumed_task);
 
       if (current_task != NULL && isr_resumed_task->priority >= current_task->priority) {
         switch_pending_flag = 1;
       }
     }
-
-    // TODO: update ticks that passed while suspended
 
     if (switch_pending_flag != 0) {
       port_context_switch();
@@ -158,7 +158,7 @@ void rtos_tick(void) {
 
   current_tick++;
 
-  while (rtos_asleep_list != NULL && rtos_asleep_list->root != NULL) {
+  while (rtos_asleep_list != NULL && rtos_asleep_list->root != NULL) { // wake up sleeping tasks
     TaskCB_t * task = rtos_asleep_list->root;
 
     if (task->wake_tick > current_tick) {

@@ -5,6 +5,7 @@
 #include "malloc.h"
 #include "port.h"
 #include "rtos.h"
+#include "task_list.h"
 
 extern int task_id;
 
@@ -28,7 +29,6 @@ TaskHandle_t task_create(const char * task_name, uint8_t priority, size_t stack_
   task->function_params = params;
   task->task_id = task_id++;
   
-  // task->state = READY; maybe? not sure yet
   task->wake_tick = 0;
 
   task->bp = (uint32_t *) rtos_malloc(stack_size);
@@ -59,6 +59,7 @@ void task_delete(TaskHandle_t task) {
     return;
   }
 
+  // TODO: Deleting running task
   // Since task is null, this task is trying to delete itself
   // task_suspend_all()
   // move_task_to_termination_list() then it will be handled by the idle task (looping through zombies)
@@ -66,8 +67,23 @@ void task_delete(TaskHandle_t task) {
 }
 
 void task_priority_set(TaskHandle_t task, uint8_t new_priority) {
+  if (task == NULL) {
+    return;
+  }
+
+  uint32_t irq_state = port_enter_critical();
+
+  if (task->state == READY) {
+    remove_from_list(rtos_ready_list, task);
+    task->priority = new_priority;
+    move_to_ready_list(task);
+    port_exit_critical(irq_state);
+    return;
+  }
+
   task->priority = new_priority;
-  // If the new priority is higher than the priority of the currently running task, a context switch is called
+
+  return;
 }
 
 void move_to_asleep_list(TaskCB_t *task, uint64_t delay)
@@ -114,14 +130,3 @@ void task_delay(uint64_t delay) {
   return;
 
 }
-
-
-/*
- * There are three states that the task can be in:
- *  - Ready: In the ready list, and ready to execute. It will be eventually ran by the scheduler.
- *  - Sleeping: The task is delayed, and is put into a delta list, sorted by time til wake, then eventually put back into ready state when times up
- *  - Blocked: The task is waiting for something to happen
- *    - If the task tried to take a mutex that is already held, puts into wait queue attatched to that mutex and is moved out of ready list
- *    - If the task tried to access a semaphore which it cannot, it is put into the wait queue attatched to that semaphore and is moved out of ready list
- *    - If the task is waiting for hardware (like uart read), it joins that uart's semaphore, then in the ISR it gets released (if woken up task has higher priority send PendSV)
- */
