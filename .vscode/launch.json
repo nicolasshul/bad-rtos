@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Cortex Debug (OpenOCD)",
+        "cwd": "${workspaceFolder}",
+        "executable": "${workspaceFolder}/build/my-rtos.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "servertype": "openocd",
+        "device": "STM32L432KC",
+        "configFiles": [
+          "interface/stlink.cfg",
+          "target/stm32l4x.cfg"
+        ],
+        "searchDir": [],
+        "runToEntryPoint": "main",
+        "showDevDebugOutput": "none",
+        "preLaunchTask": "Build RTOS"
+      }
+    ]
+  }
